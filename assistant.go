@@ -14,10 +14,22 @@ func main() {
 	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	})
-	router.HandleFunc("/get/{listId}", getListById)
+	router.HandleFunc("/get/{listId}", getTasksByListId)
 	router.HandleFunc("/", indexHandler)
 	http.ListenAndServe("0.0.0.0:3000", router)
 
+}
+
+func getTasksByListId(response http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	tasks := taskService.GetTasksFromList(vars["listId"])
+
+	responseList := ""
+
+	for _, v := range tasks.Items {
+		responseList = responseList + v.Title + "\n"
+	}
+	fmt.Fprintln(response, responseList)
 }
 
 func getListById(response http.ResponseWriter, request *http.Request) {

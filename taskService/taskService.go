@@ -89,8 +89,14 @@ func saveToken(file string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-func GetTasksFromList() {
+func GetTasksFromList(taskListId string) *tasks.Tasks {
+	srv := getTaskService()
 
+	r, err := srv.Tasks.List(taskListId).MaxResults(20).Do()
+	if err != nil {
+		log.Fatal("Unable to retrieve tasks", err)
+	}
+	return r
 }
 
 func GetTaskListById(taskListId string) *tasks.TaskList {
@@ -105,6 +111,18 @@ func GetTaskListById(taskListId string) *tasks.TaskList {
 }
 
 func GetLists() *tasks.TaskLists {
+
+	srv := getTaskService()
+
+	r, err := srv.Tasklists.List().MaxResults(10).Do()
+	if err != nil {
+		log.Fatalf("Unable to retrieve task lists.", err)
+	}
+
+	return r
+}
+
+func getTaskService() *tasks.Service {
 	ctx := context.Background()
 
 	b, err := ioutil.ReadFile("client_secret.json")
@@ -124,12 +142,5 @@ func GetLists() *tasks.TaskLists {
 	if err != nil {
 		log.Fatalf("Unable to retrieve tasks Client %v", err)
 	}
-
-	r, err := srv.Tasklists.List().MaxResults(10).Do()
-	if err != nil {
-		log.Fatalf("Unable to retrieve task lists.", err)
-	}
-
-	return r
-
+	return srv
 }
