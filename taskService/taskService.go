@@ -89,6 +89,21 @@ func saveToken(file string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
+func GetTasksFromList() {
+
+}
+
+func GetTaskListById(taskListId string) *tasks.TaskList {
+	lists := GetLists()
+
+	for _, v := range lists.Items {
+		if v.Id == taskListId {
+			return v
+		}
+	}
+	return nil
+}
+
 func GetLists() *tasks.TaskLists {
 	ctx := context.Background()
 
