@@ -10,4 +10,5 @@
 ## The above patterns tell git to ignore all files that don't have extensions ##
 
 node_modules
+typings
 *.log
