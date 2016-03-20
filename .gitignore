@@ -1,3 +1,13 @@
+#ignore all
+*
+
+#unignore all files with extensions
+!*.*
+
+#unignore all directories
+!*/
+
+## The above patterns tell git to ignore all files that don't have extensions ##
+
 node_modules
-./assistant
 *.log
