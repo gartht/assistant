@@ -125,7 +125,7 @@ func GetLists() *tasks.TaskLists {
 func getTaskService() *tasks.Service {
 	ctx := context.Background()
 
-	b, err := ioutil.ReadFile("client_secret.json")
+	b, err := ioutil.ReadFile("../Secrets/client_secret.json")
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}

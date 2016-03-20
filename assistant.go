@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -14,22 +15,31 @@ func main() {
 	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	})
-	router.HandleFunc("/get/{listId}", getTasksByListId)
-	router.HandleFunc("/", indexHandler)
-	http.ListenAndServe("0.0.0.0:3000", router)
 
+	svc := router.PathPrefix("/svc").Subrouter()
+
+	router.PathPrefix("/styles/").Handler(http.FileServer(http.Dir("./static/")))
+	router.Handle("/", http.FileServer(http.Dir("./static/")))
+
+	appDir := http.StripPrefix("/app/", http.FileServer(http.Dir("./app/")))
+	router.PathPrefix("/app/").Handler(appDir)
+
+	nodeDir := http.StripPrefix("/node_modules/", http.FileServer(http.Dir("./node_modules/")))
+	router.PathPrefix("/node_modules/").Handler(nodeDir)
+
+	svc.HandleFunc("/", indexHandler)
+	svc.HandleFunc("/get/{listId}", getTasksByListId)
+
+	http.ListenAndServe("0.0.0.0:3000", router)
 }
 
 func getTasksByListId(response http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	tasks := taskService.GetTasksFromList(vars["listId"])
 
-	responseList := ""
-
-	for _, v := range tasks.Items {
-		responseList = responseList + v.Title + "\n"
+	if err := json.NewEncoder(response).Encode(tasks.Items); err != nil {
+		panic(err)
 	}
-	fmt.Fprintln(response, responseList)
 }
 
 func getListById(response http.ResponseWriter, request *http.Request) {
@@ -40,13 +50,8 @@ func getListById(response http.ResponseWriter, request *http.Request) {
 
 func indexHandler(response http.ResponseWriter, request *http.Request) {
 	taskLists := taskService.GetLists()
-	responseTxt := "No lists found"
 
-	if len(taskLists.Items) > 0 {
-		title := taskLists.Items[0].Title
-		id := taskLists.Items[0].Id
-		responseTxt = title + " " + id
+	if err := json.NewEncoder(response).Encode(taskLists); err != nil {
+		panic(err)
 	}
-	fmt.Fprintln(response, responseTxt)
-
 }
